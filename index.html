@@ -2,128 +2,185 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Our Diary</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Vault Kitaa</title>
 <style>
   :root {
-    --bg: #FAF3E8;
-    --card: #FFFDF9;
-    --ink: #3A2E22;
-    --ink-soft: #8A7A68;
-    --line: #EADFCB;
-    --accent1: #C9694B;
-    --accent1-bg: #FBE9E1;
-    --accent2: #4C7A8C;
-    --accent2-bg: #E4EFF2;
-    --gold: #D9A441;
+    --fb-blue: #8B2FD1;
+    --fb-blue-dark: #5A1A8C;
+    --fb-blue-light: #3A2255;
+    --bg: #15101F;
+    --card: #1F1830;
+    --ink: #F1EBFF;
+    --ink-soft: #A294C2;
+    --line: #3A2E52;
+    --link: #FF4FA3;
+    --amber: #00E5C7;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--bg);
-    background-image: radial-gradient(circle at 1px 1px, #00000008 1px, transparent 0);
-    background-size: 18px 18px;
     color: var(--ink);
-    font-family: 'Nunito', -apple-system, sans-serif;
-    padding: 28px 16px 60px;
+    font-family: Arial, Helvetica, sans-serif;
+    padding-bottom: 60px;
   }
-  .wrap { max-width: 480px; margin: 0 auto; }
-  header { text-align: center; margin-bottom: 22px; }
-  header h1 {
-    font-family: 'Caveat', cursive;
-    font-size: 44px;
-    font-weight: 700;
+  .topbar {
+    background: linear-gradient(120deg, #FF4FA3, #8B2FD1 55%, #3A1C7A);
+    padding: 16px 16px;
+    text-align: center;
+  }
+  .topbar h1 {
+    color: #fff;
+    font-size: 26px;
     margin: 0;
-    color: var(--accent1);
+    font-family: Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
   }
-  header p { font-size: 13px; color: var(--ink-soft); margin: 4px 0 0; }
+  .topbar p { color: #F4D9FF; font-size: 11px; margin: 2px 0 0; }
+
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+  }
+  .tab.active { color: var(--fb-blue); border-bottom-color: var(--fb-blue); }
+
+  .wrap { max-width: 480px; margin: 0 auto; padding: 14px 10px; }
+  .page { display: none; }
+  .page.active { display: block; }
 
   .card {
     background: var(--card);
-    border-radius: 16px;
     border: 1px solid var(--line);
-    box-shadow: 0 2px 10px rgba(58,46,34,0.05);
-    padding: 20px;
-    margin-bottom: 20px;
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .card h2 {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
   }
 
-  label { display: block; font-size: 12px; color: var(--ink-soft); margin: 10px 0 4px; font-weight: 600; }
-  input[type=text] {
+  label { display: block; font-size: 11px; color: var(--ink-soft); margin: 10px 0 4px; font-weight: 700; }
+  input[type=text], input[type=datetime-local] {
     width: 100%;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    padding: 9px 10px;
-    font-size: 14px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 8px 9px;
+    font-size: 13px;
     font-family: inherit;
-    background: #FFFEFC;
+    background: #130D1E;
     color: var(--ink);
   }
+  input[type=text]::placeholder { color: #6E6089; }
+  input[type=datetime-local] { color-scheme: dark; }
   textarea#entryText {
     width: 100%;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 15px;
-    line-height: 1.6;
-    font-family: 'Nunito', sans-serif;
-    background: #FFFEFC;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: inherit;
+    background: #130D1E;
     color: var(--ink);
     resize: vertical;
-    min-height: 100px;
+    min-height: 80px;
   }
+  textarea#entryText::placeholder { color: #6E6089; }
 
-  .moods { display: flex; gap: 8px; margin-top: 4px; }
+  .moods { display: flex; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
   .mood-btn {
-    font-size: 22px;
-    background: #FFFEFC;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    padding: 6px 10px;
+    font-size: 18px;
+    background: #130D1E;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 5px 9px;
     cursor: pointer;
-    opacity: 0.45;
+    opacity: 0.4;
   }
-  .mood-btn.active { opacity: 1; border-color: var(--gold); background: #FFF6E4; }
+  .mood-btn.active { opacity: 1; border-color: var(--amber); background: #0D2E29; }
+
+  .photo-row { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+  .photo-btn {
+    background: #130D1E;
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .photo-preview { max-height: 50px; border-radius: 4px; display: none; }
+  .photo-clear { font-size: 11px; color: #C0392B; cursor: pointer; display: none; }
 
   button.primary {
-    margin-top: 16px;
+    margin-top: 14px;
     width: 100%;
-    background: var(--accent1);
+    background: var(--fb-blue);
     color: #fff;
     border: none;
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 15px;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 13px;
     font-weight: 700;
     cursor: pointer;
   }
-  button.primary:active { transform: scale(0.99); }
+  button.primary:active { background: var(--fb-blue-dark); }
 
-  .status { text-align: center; font-size: 12px; color: var(--ink-soft); margin-bottom: 10px; }
+  .status { text-align: center; font-size: 12px; color: var(--ink-soft); margin: 8px 0; }
 
-  .entry {
+  .post {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 16px 18px;
-    margin-bottom: 14px;
-    border-left: 5px solid var(--line);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
   }
-  .entry-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .entry-author {
-    font-family: 'Caveat', cursive;
-    font-size: 22px;
+  .post-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px 6px; }
+  .post-avatar {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: linear-gradient(135deg, #FF4FA3, #8B2FD1);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; flex-shrink: 0;
+  }
+  .post-author { font-weight: 700; font-size: 13.5px; color: var(--link); }
+  .post-date { font-size: 11px; color: var(--ink-soft); }
+  .post-photo { width: 100%; display: block; margin-top: 4px; }
+  .post-text { font-size: 13.5px; line-height: 1.5; padding: 2px 12px 10px; white-space: pre-wrap; margin: 0; }
+  .post-mood { margin-right: 4px; }
+
+  .comments { border-top: 1px solid var(--line); background: #150F22; padding: 8px 12px; }
+  .comment { font-size: 12.5px; color: var(--ink); margin-bottom: 6px; }
+  .comment b { color: var(--link); }
+  .comment-form { display: flex; gap: 6px; margin-top: 6px; }
+  .comment-form input[type=text] { flex: 1; padding: 6px 8px; font-size: 12px; background: #130D1E; }
+  .comment-form button {
+    background: #130D1E;
+    color: var(--amber);
+    border: 1px solid var(--amber);
+    border-radius: 4px;
+    padding: 0 12px;
+    font-size: 12px;
     font-weight: 700;
-  }
-  .entry-date { font-size: 11px; color: var(--ink-soft); }
-  .entry-mood { font-size: 18px; margin-right: 4px; }
-  .entry-text {
-    font-size: 14.5px;
-    line-height: 1.65;
-    color: var(--ink);
-    white-space: pre-wrap;
-    margin: 0;
+    cursor: pointer;
   }
 
   .empty { text-align: center; color: var(--ink-soft); font-size: 13px; padding: 36px 10px; }
@@ -133,38 +190,61 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<div class="topbar">
+  <h1>vault kitaa</h1>
+  <p>our wall, our rules</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tabWrite">✎ Write</div>
+  <div class="tab" id="tabWall">▦ Wall</div>
+</div>
+
 <div class="wrap">
-  <header>
-    <h1>Our Diary</h1>
-    <p>A shared page, whenever either of us has something to say</p>
-  </header>
 
-  <div class="card">
-    <label for="whoName">Who's writing?</label>
-    <input type="text" id="whoName" placeholder="Your name">
+  <div class="page active" id="pageWrite">
+    <div class="card">
+      <h2>NEW POST</h2>
+      <label for="whoName">Name</label>
+      <input type="text" id="whoName" placeholder="Your name">
 
-    <label>Mood</label>
-    <div class="moods" id="moods">
-      <span class="mood-btn" data-m="😊">😊</span>
-      <span class="mood-btn" data-m="😂">😂</span>
-      <span class="mood-btn" data-m="😔">😔</span>
-      <span class="mood-btn" data-m="😤">😤</span>
-      <span class="mood-btn" data-m="😴">😴</span>
-      <span class="mood-btn" data-m="🥹">🥹</span>
+      <label for="entryDate">Date</label>
+      <input type="datetime-local" id="entryDate">
+
+      <label>Mood</label>
+      <div class="moods" id="moods">
+        <span class="mood-btn" data-m="🔥">🔥</span>
+        <span class="mood-btn" data-m="😤">😤</span>
+        <span class="mood-btn" data-m="😂">😂</span>
+        <span class="mood-btn" data-m="💀">💀</span>
+        <span class="mood-btn" data-m="😴">😴</span>
+        <span class="mood-btn" data-m="🧠">🧠</span>
+      </div>
+
+      <label for="entryText">What's on your mind?</label>
+      <textarea id="entryText" placeholder="Type something..."></textarea>
+
+      <label>Photo (optional)</label>
+      <div class="photo-row">
+        <label class="photo-btn" for="photoInput">+ Add photo</label>
+        <input type="file" id="photoInput" accept="image/*" style="display:none">
+        <img id="photoPreview" class="photo-preview">
+        <span id="photoClear" class="photo-clear">Remove</span>
+      </div>
+
+      <button class="primary" id="saveBtn">Post</button>
     </div>
-
-    <label for="entryText">What's on your mind?</label>
-    <textarea id="entryText" placeholder="Write freely..."></textarea>
-
-    <button class="primary" id="saveBtn">Add to diary</button>
+    <div id="status" class="status"></div>
   </div>
 
-  <div id="status" class="status"></div>
-  <div id="list"></div>
+  <div class="page" id="pageWall">
+    <div id="list"></div>
+  </div>
+
 </div>
 
 <script>
-  // Reuses the same Firebase project as the makan app, just a different path.
   var firebaseConfig = {
     apiKey: "AIzaSyBiwBK4A1nWC9gfOXYDchfZNiXaaezynpo",
     authDomain: "makan-6f26f.firebaseapp.com",
@@ -174,17 +254,33 @@
     appId: "1:465005440964:web:a8a5810f6ec18dd78e7e91"
   };
   firebase.initializeApp(firebaseConfig);
-  var db = firebase.database().ref('diary-entries');
+  var db = firebase.database().ref('vault-kitaa-entries');
 
   var entries = [];
   var selectedMood = null;
+  var selectedPhoto = null;
 
-  var palette = ['#C9694B', '#4C7A8C', '#8A6FA8', '#5E8C4F', '#C98A1E', '#B2546A', '#3E7E85', '#A05A2C'];
-  function colorForName(name) {
-    var hash = 0;
-    for (var i = 0; i < name.length; i++) { hash = name.charCodeAt(i) + ((hash << 5) - hash); }
-    return palette[Math.abs(hash) % palette.length];
+  // Tabs
+  var tabWrite = document.getElementById('tabWrite');
+  var tabWall = document.getElementById('tabWall');
+  var pageWrite = document.getElementById('pageWrite');
+  var pageWall = document.getElementById('pageWall');
+  tabWrite.addEventListener('click', function() {
+    tabWrite.classList.add('active'); tabWall.classList.remove('active');
+    pageWrite.classList.add('active'); pageWall.classList.remove('active');
+  });
+  tabWall.addEventListener('click', function() {
+    tabWall.classList.add('active'); tabWrite.classList.remove('active');
+    pageWall.classList.add('active'); pageWrite.classList.remove('active');
+  });
+
+  // Default date field to "now" in local time
+  function nowForInput() {
+    var d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
   }
+  document.getElementById('entryDate').value = nowForInput();
 
   firebase.auth().signInAnonymously().catch(function(err) {
     setStatus('Could not connect — auth error.');
@@ -196,6 +292,36 @@
       document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
     });
+  });
+
+  document.getElementById('photoInput').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var maxW = 700;
+        var scale = Math.min(1, maxW / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        selectedPhoto = canvas.toDataURL('image/jpeg', 0.6);
+        document.getElementById('photoPreview').src = selectedPhoto;
+        document.getElementById('photoPreview').style.display = 'block';
+        document.getElementById('photoClear').style.display = 'inline';
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('photoClear').addEventListener('click', function() {
+    selectedPhoto = null;
+    document.getElementById('photoInput').value = '';
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('photoClear').style.display = 'none';
   });
 
   function setStatus(msg) {
@@ -227,41 +353,89 @@
     if (!author) { setStatus('Add your name first.'); return; }
     if (!selectedMood) { setStatus('Pick a mood first.'); return; }
     var text = document.getElementById('entryText').value.trim();
-    if (!text) { setStatus('Write something before saving.'); return; }
+    if (!text) { setStatus('Write something before posting.'); return; }
+    var dateVal = document.getElementById('entryDate').value;
+    if (!dateVal) { setStatus('Set a date first.'); return; }
 
     var entry = {
       id: 'e' + Date.now(),
       author: author,
       mood: selectedMood,
       text: text,
-      date: new Date().toISOString()
+      photo: selectedPhoto,
+      date: new Date(dateVal).toISOString(),
+      comments: []
     };
     entries.unshift(entry);
     document.getElementById('entryText').value = '';
+    document.getElementById('photoInput').value = '';
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('photoClear').style.display = 'none';
+    document.getElementById('entryDate').value = nowForInput();
+    selectedPhoto = null;
     render();
-    setStatus('Saved.');
+    setStatus('Posted.');
     await saveEntries();
     setTimeout(function() { setStatus(''); }, 1500);
+    tabWall.click();
   });
+
+  function initials(name) {
+    return name.trim().slice(0, 1).toUpperCase();
+  }
 
   function render() {
     var list = document.getElementById('list');
     if (entries.length === 0) {
-      list.innerHTML = '<div class="empty">No entries yet. Be the first to write something.</div>';
+      list.innerHTML = '<div class="empty">The wall is empty. Post something.</div>';
       return;
     }
     var sorted = entries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
     list.innerHTML = sorted.map(function(e) {
       var d = new Date(e.date);
       var dateStr = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) +
-        ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-      var color = colorForName(e.author);
-      return '<div class="entry" style="border-left-color:' + color + '">' +
-        '<div class="entry-top"><span class="entry-author" style="color:' + color + '">' + escapeHtml(e.author) + '</span>' +
-        '<span class="entry-date">' + dateStr + '</span></div>' +
-        '<p class="entry-text"><span class="entry-mood">' + e.mood + '</span>' + escapeHtml(e.text) + '</p>' +
+        ' at ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      var photoHtml = e.photo ? '<img class="post-photo" src="' + e.photo + '">' : '';
+      var comments = e.comments || [];
+      var commentsHtml = comments.map(function(c) {
+        return '<div class="comment"><b>' + escapeHtml(c.author) + ':</b> ' + escapeHtml(c.text) + '</div>';
+      }).join('');
+      return '<div class="post" data-id="' + e.id + '">' +
+        '<div class="post-head">' +
+          '<div class="post-avatar">' + initials(e.author) + '</div>' +
+          '<div><div class="post-author">' + escapeHtml(e.author) + '</div>' +
+          '<div class="post-date">' + dateStr + '</div></div>' +
+        '</div>' +
+        photoHtml +
+        '<p class="post-text"><span class="post-mood">' + e.mood + '</span>' + escapeHtml(e.text) + '</p>' +
+        '<div class="comments">' +
+          commentsHtml +
+          '<div class="comment-form">' +
+            '<input type="text" class="comment-name" placeholder="Name">' +
+            '<input type="text" class="comment-text" placeholder="Write a comment...">' +
+            '<button class="comment-send" data-id="' + e.id + '">Comment</button>' +
+          '</div>' +
+        '</div>' +
         '</div>';
     }).join('');
+
+    list.querySelectorAll('.comment-send').forEach(function(btn) {
+      btn.addEventListener('click', async function() {
+        var postEl = btn.closest('.post');
+        var nameInput = postEl.querySelector('.comment-name');
+        var textInput = postEl.querySelector('.comment-text');
+        var cName = nameInput.value.trim();
+        var cText = textInput.value.trim();
+        if (!cName || !cText) { return; }
+        var id = btn.getAttribute('data-id');
+        var target = entries.find(function(e) { return e.id === id; });
+        if (!target) return;
+        if (!target.comments) target.comments = [];
+        target.comments.push({ author: cName, text: cText, date: new Date().toISOString() });
+        render();
+        await saveEntries();
+      });
+    });
   }
 
   function escapeHtml(str) {
