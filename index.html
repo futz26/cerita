@@ -3,42 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <title>Vault Kitaa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --fb-blue: #8B2FD1;
-    --fb-blue-dark: #5A1A8C;
-    --fb-blue-light: #3A2255;
-    --bg: #15101F;
-    --card: #1F1830;
-    --ink: #F1EBFF;
-    --ink-soft: #A294C2;
-    --line: #3A2E52;
-    --link: #FF4FA3;
-    --amber: #00E5C7;
+    --fb-blue: #7C5CFF;
+    --fb-blue-dark: #5B42D1;
+    --fb-blue-light: #241F3D;
+    --bg: #0A0C12;
+    --card: #141722;
+    --surface: #1B1F2C;
+    --ink: #ECEEF4;
+    --ink-soft: #8A91A6;
+    --line: #262B3C;
+    --link: #2FD9B9;
+    --amber: #E8B44D;
+    --hunter: #2FD9B9;
+    --oxblood: #FF6B6B;
+    --gold: #E8B44D;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Inter', Arial, Helvetica, sans-serif;
     padding-bottom: 60px;
   }
   .topbar {
-    background: linear-gradient(120deg, #FF4FA3, #8B2FD1 55%, #3A1C7A);
-    padding: 16px 16px;
+    background: linear-gradient(120deg, #1A1030, #0A0C12 70%);
+    padding: 20px 16px 16px;
     text-align: center;
+    border-bottom: 3px solid var(--gold);
   }
   .topbar h1 {
-    color: #fff;
+    color: #F3F1FF;
     font-size: 26px;
     margin: 0;
-    font-family: Georgia, serif;
+    font-family: 'Playfair Display', Georgia, serif;
     font-weight: 700;
-    letter-spacing: -0.5px;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    letter-spacing: 0.5px;
+    background: linear-gradient(90deg, var(--fb-blue), var(--hunter));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .topbar p { color: #F4D9FF; font-size: 11px; margin: 2px 0 0; }
+  .topbar p { color: #8E89B8; font-size: 11px; margin: 4px 0 0; letter-spacing: 0.08em; text-transform: uppercase; }
 
   .tabs {
     display: flex;
@@ -80,66 +91,70 @@
   input[type=text], input[type=datetime-local] {
     width: 100%;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: 2px;
     padding: 8px 9px;
     font-size: 13px;
     font-family: inherit;
-    background: #130D1E;
+    background: var(--surface);
     color: var(--ink);
   }
-  input[type=text]::placeholder { color: #6E6089; }
+  input[type=text]::placeholder { color: #5B6378; }
   input[type=datetime-local] { color-scheme: dark; }
+  input[type=text]:focus, textarea#entryText:focus { outline: none; border-color: var(--gold); }
   textarea#entryText {
     width: 100%;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: 2px;
     padding: 10px;
     font-size: 14px;
     line-height: 1.5;
     font-family: inherit;
-    background: #130D1E;
+    background: var(--surface);
     color: var(--ink);
     resize: vertical;
     min-height: 80px;
   }
-  textarea#entryText::placeholder { color: #6E6089; }
+  textarea#entryText::placeholder { color: #5B6378; }
+  .word-count { font-size: 11px; color: var(--ink-soft); text-align: right; margin-top: 3px; }
 
   .moods { display: flex; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
   .mood-btn {
-    font-size: 18px;
-    background: #130D1E;
+    font-size: 16px;
+    background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 5px;
-    padding: 5px 9px;
+    border-radius: 20px;
+    padding: 5px 11px;
     cursor: pointer;
-    opacity: 0.4;
+    opacity: 0.45;
   }
-  .mood-btn.active { opacity: 1; border-color: var(--amber); background: #0D2E29; }
+  .mood-btn.active { opacity: 1; border-color: var(--gold); background: #3A2E12; }
 
   .photo-row { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
   .photo-btn {
-    background: #130D1E;
+    background: var(--surface);
     border: 1px dashed var(--line);
-    border-radius: 4px;
+    border-radius: 2px;
     padding: 8px 12px;
     font-size: 12px;
     color: var(--ink-soft);
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
   }
-  .photo-preview { max-height: 50px; border-radius: 4px; display: none; }
-  .photo-clear { font-size: 11px; color: #C0392B; cursor: pointer; display: none; }
+  .photo-preview { max-height: 50px; border-radius: 2px; display: none; }
+  .photo-clear { font-size: 11px; color: var(--oxblood); cursor: pointer; display: none; }
 
   button.primary {
     margin-top: 14px;
     width: 100%;
-    background: var(--fb-blue);
-    color: #fff;
+    background: linear-gradient(90deg, var(--fb-blue), var(--fb-blue-dark));
+    color: #F3F1FF;
     border: none;
-    border-radius: 4px;
-    padding: 10px;
-    font-size: 13px;
+    border-radius: 2px;
+    padding: 11px;
+    font-size: 12.5px;
     font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     cursor: pointer;
   }
   button.primary:active { background: var(--fb-blue-dark); }
@@ -149,34 +164,38 @@
   .post {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 6px;
-    margin-bottom: 12px;
+    border-radius: 2px;
+    margin-bottom: 14px;
     overflow: hidden;
   }
-  .post-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px 6px; }
+  .post.pinned { border-color: var(--gold); border-width: 1.5px; }
+  .post-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px 8px; }
   .post-avatar {
-    width: 36px; height: 36px; border-radius: 8px;
-    background: linear-gradient(135deg, #FF4FA3, #8B2FD1);
-    color: #fff;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--fb-blue), var(--hunter));
+    color: #0A0C12;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 15px; flex-shrink: 0;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
+    font-family: 'Playfair Display', serif;
   }
-  .post-author { font-weight: 700; font-size: 13.5px; color: var(--link); }
-  .post-date { font-size: 11px; color: var(--ink-soft); }
+  .post-author { font-weight: 700; font-size: 13.5px; color: var(--ink); }
+  .post-date { font-size: 10.5px; color: var(--ink-soft); }
+  .pin-btn { margin-left: auto; font-size: 13px; cursor: pointer; color: var(--line); }
+  .pin-btn.active { color: var(--gold); }
   .post-photo { width: 100%; display: block; margin-top: 4px; }
-  .post-text { font-size: 13.5px; line-height: 1.5; padding: 2px 12px 10px; white-space: pre-wrap; margin: 0; }
+  .post-text { font-size: 13.5px; line-height: 1.6; padding: 2px 14px 12px; white-space: pre-wrap; margin: 0; }
   .post-mood { margin-right: 4px; }
 
-  .comments { border-top: 1px solid var(--line); background: #150F22; padding: 8px 12px; }
+  .comments { border-top: 1px solid var(--line); background: #0F121A; padding: 10px 14px; }
   .comment { font-size: 12.5px; color: var(--ink); margin-bottom: 6px; }
-  .comment b { color: var(--link); }
+  .comment b { color: var(--hunter); }
   .comment-form { display: flex; gap: 6px; margin-top: 6px; }
-  .comment-form input[type=text] { flex: 1; padding: 6px 8px; font-size: 12px; background: #130D1E; }
+  .comment-form input[type=text] { flex: 1; padding: 6px 8px; font-size: 12px; background: var(--surface); }
   .comment-form button {
-    background: #130D1E;
-    color: var(--amber);
-    border: 1px solid var(--amber);
-    border-radius: 4px;
+    background: var(--surface);
+    color: var(--hunter);
+    border: 1px solid var(--hunter);
+    border-radius: 2px;
     padding: 0 12px;
     font-size: 12px;
     font-weight: 700;
@@ -184,6 +203,76 @@
   }
 
   .empty { text-align: center; color: var(--ink-soft); font-size: 13px; padding: 36px 10px; }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes popScale {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-26px) scale(1.3); }
+  }
+  .fade-in { animation: fadeSlideUp 0.45s ease both; }
+  .fade-in-1 { animation-delay: 0.05s; }
+  .fade-in-2 { animation-delay: 0.12s; }
+  .fade-in-3 { animation-delay: 0.19s; }
+
+  .progress-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
+  .progress-dot {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10.5px; color: var(--ink-soft);
+    border: 1px solid var(--line); border-radius: 20px;
+    padding: 4px 10px;
+    transition: all 0.25s ease;
+  }
+  .progress-dot .bead {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--line); transition: background 0.25s ease;
+  }
+  .progress-dot.done { color: var(--hunter); border-color: var(--hunter); }
+  .progress-dot.done .bead { background: var(--hunter); }
+
+  .mood-btn { transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
+  .mood-btn:active { transform: scale(0.88); }
+  .mood-btn.active { animation: popScale 0.3s ease; }
+
+  .preview-card {
+    border: 1px dashed var(--line);
+    border-radius: 2px;
+    padding: 12px 14px;
+    margin-top: 16px;
+    background: var(--surface);
+    opacity: 0.55;
+    transition: opacity 0.25s ease;
+  }
+  .preview-card.filled { opacity: 1; border-style: solid; border-color: var(--gold); }
+  .preview-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
+
+  button.primary { transition: transform 0.12s ease, box-shadow 0.2s ease; }
+  button.primary:active { transform: scale(0.98); }
+  button.primary:hover { box-shadow: 0 3px 10px rgba(27,42,74,0.25); }
+
+  .post { animation: fadeSlideUp 0.35s ease both; transition: box-shadow 0.2s ease; }
+  .post:hover { box-shadow: 0 3px 14px rgba(0,0,0,0.06); }
+
+  .react-btn { transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease; position: relative; }
+  .react-btn:active { transform: scale(0.9); }
+  .react-btn.popped { animation: popScale 0.35s ease; }
+  .react-btn.mine { background: var(--fb-blue-light) !important; border-color: var(--gold) !important; color: var(--hunter) !important; font-weight: 700; }
+  .react-float {
+    position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; pointer-events: none;
+    animation: floatUp 0.6s ease forwards;
+  }
+
+  .pin-btn { transition: transform 0.15s ease, color 0.15s ease; }
+  .pin-btn:active { transform: scale(0.85); }
+  .pin-btn.active { animation: popScale 0.3s ease; }
 </style>
 </head>
 <body>
@@ -193,7 +282,7 @@
 
 <div class="topbar">
   <h1>vault kitaa</h1>
-  <p>our wall, our rules</p>
+  <p>Est. between us</p>
 </div>
 
 <div class="tabs">
@@ -204,7 +293,7 @@
 <div class="wrap">
 
   <div class="page active" id="pageWrite">
-    <div class="card">
+    <div class="card fade-in fade-in-1">
       <h2>NEW POST</h2>
       <label for="whoName">Name</label>
       <input type="text" id="whoName" placeholder="Your name">
@@ -224,6 +313,7 @@
 
       <label for="entryText">What's on your mind?</label>
       <textarea id="entryText" placeholder="Type something..."></textarea>
+      <div class="word-count" id="wordCount">0 words</div>
 
       <label>Photo (optional)</label>
       <div class="photo-row">
@@ -233,14 +323,59 @@
         <span id="photoClear" class="photo-clear">Remove</span>
       </div>
 
+      <div class="progress-row">
+        <span class="progress-dot" id="progName"><span class="bead"></span>Name</span>
+        <span class="progress-dot" id="progMood"><span class="bead"></span>Mood</span>
+        <span class="progress-dot" id="progText"><span class="bead"></span>Entry</span>
+      </div>
+
       <button class="primary" id="saveBtn">Post</button>
     </div>
+
+    <div class="card fade-in fade-in-2">
+      <div class="preview-label">Live preview</div>
+      <div class="preview-card" id="previewCard">
+        <div class="post-head" style="padding:0 0 6px;">
+          <div class="post-avatar" id="previewAvatar">?</div>
+          <div>
+            <div class="post-author" id="previewAuthor">Your name</div>
+            <div class="post-date">Just now</div>
+          </div>
+        </div>
+        <p class="post-text" style="padding:2px 0 0;" id="previewText">
+          <span id="previewMood"></span><span id="previewTextInner">Start typing to see your post come together...</span>
+        </p>
+      </div>
+    </div>
+
     <div id="status" class="status"></div>
   </div>
 
   <div class="page" id="pageWall">
+    <div class="card fade-in fade-in-1" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;">
+      <span style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--hunter);" id="streakNum">0</span>
+      <span style="font-size:11px;color:var(--ink-soft);letter-spacing:0.03em;">day streak — at least one post per day</span>
+    </div>
+    <div class="card fade-in fade-in-2" style="padding:10px;">
+      <input type="text" id="searchBox" placeholder="Search entries..." style="margin-bottom:8px;">
+      <div style="display:flex;gap:8px;">
+        <select id="filterAuthor" style="flex:1;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:7px;font-size:12px;">
+          <option value="">Everyone</option>
+        </select>
+        <select id="filterMood" style="flex:1;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:7px;font-size:12px;">
+          <option value="">Any mood</option>
+          <option value="🔥">🔥</option>
+          <option value="😤">😤</option>
+          <option value="😂">😂</option>
+          <option value="💀">💀</option>
+          <option value="😴">😴</option>
+          <option value="🧠">🧠</option>
+        </select>
+      </div>
+    </div>
     <div id="list"></div>
   </div>
+
 
 </div>
 
@@ -286,11 +421,41 @@
     setStatus('Could not connect — auth error.');
   });
 
+  function updatePreview() {
+    var name = document.getElementById('whoName').value.trim();
+    var text = document.getElementById('entryText').value.trim();
+    document.getElementById('previewAuthor').textContent = name || 'Your name';
+    document.getElementById('previewAvatar').textContent = name ? initials(name) : '?';
+    document.getElementById('previewMood').textContent = selectedMood ? selectedMood + ' ' : '';
+    document.getElementById('previewTextInner').textContent = text || 'Start typing to see your post come together...';
+    var card = document.getElementById('previewCard');
+    card.classList.toggle('filled', !!(name && text));
+  }
+
+  function updateProgress() {
+    var name = document.getElementById('whoName').value.trim();
+    var text = document.getElementById('entryText').value.trim();
+    document.getElementById('progName').classList.toggle('done', !!name);
+    document.getElementById('progMood').classList.toggle('done', !!selectedMood);
+    document.getElementById('progText').classList.toggle('done', !!text);
+  }
+
+  document.getElementById('whoName').addEventListener('input', function() { updatePreview(); updateProgress(); });
+
+  document.getElementById('entryText').addEventListener('input', function() {
+    var words = this.value.trim().length ? this.value.trim().split(/\s+/).length : 0;
+    document.getElementById('wordCount').textContent = words + (words === 1 ? ' word' : ' words');
+    updatePreview();
+    updateProgress();
+  });
+
   document.querySelectorAll('.mood-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       selectedMood = btn.getAttribute('data-m');
       document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
+      updatePreview();
+      updateProgress();
     });
   });
 
@@ -364,7 +529,9 @@
       text: text,
       photo: selectedPhoto,
       date: new Date(dateVal).toISOString(),
-      comments: []
+      comments: [],
+      reactions: {},
+      pinned: false
     };
     entries.unshift(entry);
     document.getElementById('entryText').value = '';
@@ -372,7 +539,12 @@
     document.getElementById('photoPreview').style.display = 'none';
     document.getElementById('photoClear').style.display = 'none';
     document.getElementById('entryDate').value = nowForInput();
+    selectedMood = null;
+    document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('wordCount').textContent = '0 words';
     selectedPhoto = null;
+    updatePreview();
+    updateProgress();
     render();
     setStatus('Posted.');
     await saveEntries();
@@ -384,13 +556,47 @@
     return name.trim().slice(0, 1).toUpperCase();
   }
 
+  var reactionEmojis = ['❤️', '😂', '🔥', '👀'];
+
+  function getMyReactions() {
+    try {
+      return JSON.parse(localStorage.getItem('vault-kitaa-my-reactions') || '{}');
+    } catch (e) { return {}; }
+  }
+  function setMyReactions(obj) {
+    try { localStorage.setItem('vault-kitaa-my-reactions', JSON.stringify(obj)); } catch (e) {}
+  }
+
+  function populateAuthorFilter() {
+    var sel = document.getElementById('filterAuthor');
+    var current = sel.value;
+    var authors = Array.from(new Set(entries.map(function(e) { return e.author; })));
+    sel.innerHTML = '<option value="">Everyone</option>' + authors.map(function(a) {
+      return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>';
+    }).join('');
+    sel.value = current;
+  }
+
   function render() {
+    updateStreak();
+    populateAuthorFilter();
     var list = document.getElementById('list');
-    if (entries.length === 0) {
-      list.innerHTML = '<div class="empty">The wall is empty. Post something.</div>';
+    var filterAuthor = document.getElementById('filterAuthor').value;
+    var filterMood = document.getElementById('filterMood').value;
+    var searchTerm = (document.getElementById('searchBox').value || '').trim().toLowerCase();
+    var filtered = entries.filter(function(e) {
+      var matchesSearch = !searchTerm || e.text.toLowerCase().indexOf(searchTerm) !== -1 || e.author.toLowerCase().indexOf(searchTerm) !== -1;
+      return (!filterAuthor || e.author === filterAuthor) && (!filterMood || e.mood === filterMood) && matchesSearch;
+    });
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty">Nothing here yet. Try a different filter, or post something.</div>';
       return;
     }
-    var sorted = entries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+    var sorted = filtered.slice().sort(function(a, b) {
+      if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+      return new Date(b.date) - new Date(a.date);
+    });
+    var myReactions = getMyReactions();
     list.innerHTML = sorted.map(function(e) {
       var d = new Date(e.date);
       var dateStr = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) +
@@ -400,14 +606,22 @@
       var commentsHtml = comments.map(function(c) {
         return '<div class="comment"><b>' + escapeHtml(c.author) + ':</b> ' + escapeHtml(c.text) + '</div>';
       }).join('');
-      return '<div class="post" data-id="' + e.id + '">' +
+      return '<div class="post' + (e.pinned ? ' pinned' : '') + '" data-id="' + e.id + '">' +
         '<div class="post-head">' +
           '<div class="post-avatar">' + initials(e.author) + '</div>' +
           '<div><div class="post-author">' + escapeHtml(e.author) + '</div>' +
           '<div class="post-date">' + dateStr + '</div></div>' +
+          '<span class="pin-btn' + (e.pinned ? ' active' : '') + '" data-id="' + e.id + '" title="Pin">📌</span>' +
         '</div>' +
         photoHtml +
         '<p class="post-text"><span class="post-mood">' + e.mood + '</span>' + escapeHtml(e.text) + '</p>' +
+        '<div style="display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap;">' +
+          reactionEmojis.map(function(em) {
+            var count = (e.reactions && e.reactions[em]) || 0;
+            var mine = !!(myReactions[e.id] && myReactions[e.id][em]);
+            return '<span class="react-btn' + (mine ? ' mine' : '') + '" data-id="' + e.id + '" data-emoji="' + em + '" style="font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:4px 9px;cursor:pointer;color:var(--ink-soft);">' + em + (count > 0 ? ' ' + count : '') + '</span>';
+          }).join('') +
+        '</div>' +
         '<div class="comments">' +
           commentsHtml +
           '<div class="comment-form">' +
@@ -436,6 +650,79 @@
         await saveEntries();
       });
     });
+
+    list.querySelectorAll('.react-btn').forEach(function(btn) {
+      btn.addEventListener('click', async function() {
+        var id = btn.getAttribute('data-id');
+        var emoji = btn.getAttribute('data-emoji');
+        var target = entries.find(function(e) { return e.id === id; });
+        if (!target) return;
+        if (!target.reactions) target.reactions = {};
+
+        var mine = getMyReactions();
+        if (!mine[id]) mine[id] = {};
+        var alreadyMine = !!mine[id][emoji];
+
+        if (alreadyMine) {
+          target.reactions[emoji] = Math.max(0, (target.reactions[emoji] || 1) - 1);
+          delete mine[id][emoji];
+        } else {
+          target.reactions[emoji] = (target.reactions[emoji] || 0) + 1;
+          mine[id][emoji] = true;
+        }
+        setMyReactions(mine);
+
+        // Instant visual feedback on the exact button, without a full re-render
+        var newCount = target.reactions[emoji];
+        btn.textContent = emoji + (newCount > 0 ? ' ' + newCount : '');
+        btn.classList.toggle('mine', !alreadyMine);
+        btn.classList.remove('popped');
+        void btn.offsetWidth;
+        btn.classList.add('popped');
+        var floater = document.createElement('span');
+        floater.className = 'react-float';
+        floater.textContent = alreadyMine ? '−1' : '+1';
+        btn.appendChild(floater);
+        setTimeout(function() { floater.remove(); }, 650);
+
+        await saveEntries();
+      });
+    });
+
+    list.querySelectorAll('.pin-btn').forEach(function(btn) {
+      btn.addEventListener('click', async function() {
+        var id = btn.getAttribute('data-id');
+        var target = entries.find(function(e) { return e.id === id; });
+        if (!target) return;
+        target.pinned = !target.pinned;
+        render();
+        await saveEntries();
+      });
+    });
+  }
+
+  document.getElementById('filterAuthor').addEventListener('change', render);
+  document.getElementById('filterMood').addEventListener('change', render);
+  document.getElementById('searchBox').addEventListener('input', render);
+
+  function updateStreak() {
+    var byDay = {};
+    entries.forEach(function(e) {
+      var day = e.date.slice(0, 10);
+      byDay[day] = true;
+    });
+    var streak = 0;
+    var cursor = new Date();
+    while (true) {
+      var key = cursor.toISOString().slice(0, 10);
+      if (byDay[key]) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    document.getElementById('streakNum').textContent = streak;
   }
 
   function escapeHtml(str) {
