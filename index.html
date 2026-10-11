@@ -401,22 +401,8 @@
 </div>
 
 <script>
-  var firebaseConfig = {
-    apiKey: "AIzaSyBiwBK4A1nWC9gfOXYDchfZNiXaaezynpo",
-    authDomain: "makan-6f26f.firebaseapp.com",
-    databaseURL: "https://makan-6f26f-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "makan-6f26f",
-    storageBucket: "makan-6f26f.firebasestorage.app",
-    appId: "1:465005440964:web:a8a5810f6ec18dd78e7e91"
-  };
-  firebase.initializeApp(firebaseConfig);
-  var db = firebase.database().ref('vault-kitaa-entries');
-
-  var entries = [];
-  var selectedMood = null;
-  var selectedPhoto = null;
-
-  // Tabs
+  // Tabs are wired first and don't depend on Firebase, so Write/Wall switching
+  // keeps working even if the Firebase scripts below fail to load or throw.
   var tabWrite = document.getElementById('tabWrite');
   var tabWall = document.getElementById('tabWall');
   var pageWrite = document.getElementById('pageWrite');
@@ -430,6 +416,26 @@
     pageWall.classList.add('active'); pageWrite.classList.remove('active');
   });
 
+  var entries = [];
+  var selectedMood = null;
+  var selectedPhoto = null;
+  var db = null;
+
+  try {
+    var firebaseConfig = {
+      apiKey: "AIzaSyBiwBK4A1nWC9gfOXYDchfZNiXaaezynpo",
+      authDomain: "makan-6f26f.firebaseapp.com",
+      databaseURL: "https://makan-6f26f-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "makan-6f26f",
+      storageBucket: "makan-6f26f.firebasestorage.app",
+      appId: "1:465005440964:web:a8a5810f6ec18dd78e7e91"
+    };
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database().ref('vault-kitaa-entries');
+  } catch (err) {
+    setStatus('Could not load Firebase — check your connection and refresh.');
+  }
+
   // Default date field to "now" in local time
   function nowForInput() {
     var d = new Date();
@@ -438,9 +444,11 @@
   }
   document.getElementById('entryDate').value = nowForInput();
 
-  firebase.auth().signInAnonymously().catch(function(err) {
-    setStatus('Could not connect — auth error.');
-  });
+  if (db) {
+    firebase.auth().signInAnonymously().catch(function(err) {
+      setStatus('Could not connect — auth error.');
+    });
+  }
 
   function updatePreview() {
     var name = document.getElementById('whoName').value.trim();
@@ -514,13 +522,4 @@
     document.getElementById('status').textContent = msg || '';
   }
 
-  function loadEntries() {
-    setStatus('loading the tea...');
-    db.on('value', function(snapshot) {
-      var val = snapshot.val();
-      entries = val ? JSON.parse(val) : [];
-      setStatus('');
-      render();
-      renderOnThisDay();
-    }, function(err) {
-      setStatus('Could not connect — check your Firebase confi
+  function loadE
