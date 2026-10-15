@@ -522,4 +522,290 @@
     document.getElementById('status').textContent = msg || '';
   }
 
-  function loadE
+  function loadEntries() {
+    setStatus('loading the tea...');
+    db.on('value', function(snapshot) {
+      var val = snapshot.val();
+      entries = val ? JSON.parse(val) : [];
+      setStatus('');
+      render();
+      renderOnThisDay();
+    }, function(err) {
+      setStatus('Could not connect — check your Firebase config and database rules.');
+    });
+  }
+
+  async function saveEntries() {
+    try {
+      await db.set(JSON.stringify(entries));
+    } catch (e) {
+      setStatus('Could not save — try again.');
+    }
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', async function() {
+    var author = document.getElementById('whoName').value.trim();
+    if (!author) { setStatus('who even are you? add your name.'); return; }
+    if (!selectedMood) { setStatus('pick a mood, any mood.'); return; }
+    var text = document.getElementById('entryText').value.trim();
+    if (!text) { setStatus('say something first bestie.'); return; }
+    var dateVal = document.getElementById('entryDate').value;
+    if (!dateVal) { setStatus('when did this even happen?'); return; }
+
+    var entry = {
+      id: 'e' + Date.now(),
+      author: author,
+      mood: selectedMood,
+      text: text,
+      photo: selectedPhoto,
+      date: new Date(dateVal).toISOString(),
+      comments: [],
+      reactions: {},
+      pinned: false
+    };
+    entries.unshift(entry);
+    document.getElementById('entryText').value = '';
+    document.getElementById('photoInput').value = '';
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('photoClear').style.display = 'none';
+    document.getElementById('entryDate').value = nowForInput();
+    selectedMood = null;
+    document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('wordCount').textContent = '0 words';
+    selectedPhoto = null;
+    updatePreview();
+    updateProgress();
+    render();
+    setStatus('sent — that\'s on periodt 💅');
+    await saveEntries();
+    setTimeout(function() { setStatus(''); }, 1500);
+    tabWall.click();
+  });
+
+  function initials(name) {
+    return name.trim().slice(0, 1).toUpperCase();
+  }
+
+  var reactionEmojis = ['❤️', '😂', '🔥', '👀'];
+
+  function getMyReactions() {
+    try {
+      return JSON.parse(localStorage.getItem('vault-kitaa-my-reactions') || '{}');
+    } catch (e) { return {}; }
+  }
+  function setMyReactions(obj) {
+    try { localStorage.setItem('vault-kitaa-my-reactions', JSON.stringify(obj)); } catch (e) {}
+  }
+
+  function populateAuthorFilter() {
+    var sel = document.getElementById('filterAuthor');
+    var current = sel.value;
+    var authors = Array.from(new Set(entries.map(function(e) { return e.author; })));
+    sel.innerHTML = '<option value="">Everyone</option>' + authors.map(function(a) {
+      return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>';
+    }).join('');
+    sel.value = current;
+  }
+
+  // Turns @name into a highlighted mention span (purely visual — any name works)
+  function linkify(text) {
+    return escapeHtml(text).replace(/@(\w[\w.]*)/g, '<span class="mention">@$1</span>');
+  }
+
+  function postCardHtml(e, myReactions) {
+    var d = new Date(e.date);
+    var dateStr = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) +
+      ' at ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    var photoHtml = e.photo ? '<img class="post-photo" src="' + e.photo + '">' : '';
+    var comments = e.comments || [];
+    var commentsHtml = comments.map(function(c) {
+      return '<div class="comment"><b>' + escapeHtml(c.author) + ':</b> ' + linkify(c.text) + '</div>';
+    }).join('');
+    return '<div class="post' + (e.pinned ? ' pinned' : '') + '" data-id="' + e.id + '">' +
+      '<div class="post-head">' +
+        '<div class="post-avatar">' + initials(e.author) + '</div>' +
+        '<div><div class="post-author">' + escapeHtml(e.author) + '</div>' +
+        '<div class="post-date">' + dateStr + '</div></div>' +
+        '<span class="pin-btn' + (e.pinned ? ' active' : '') + '" data-id="' + e.id + '" title="Pin">📌</span>' +
+      '</div>' +
+      photoHtml +
+      '<p class="post-text"><span class="post-mood">' + e.mood + '</span>' + linkify(e.text) + '</p>' +
+      '<div style="display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap;">' +
+        reactionEmojis.map(function(em) {
+          var count = (e.reactions && e.reactions[em]) || 0;
+          var mine = !!(myReactions[e.id] && myReactions[e.id][em]);
+          return '<span class="react-btn' + (mine ? ' mine' : '') + '" data-id="' + e.id + '" data-emoji="' + em + '" style="font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:4px 9px;cursor:pointer;color:var(--ink-soft);">' + em + (count > 0 ? ' ' + count : '') + '</span>';
+        }).join('') +
+      '</div>' +
+      '<div class="comments">' +
+        commentsHtml +
+        '<div class="comment-form">' +
+          '<input type="text" class="comment-name" placeholder="Name">' +
+          '<input type="text" class="comment-text" placeholder="say something... @name to tag">' +
+          '<button class="comment-send" data-id="' + e.id + '">Reply</button>' +
+        '</div>' +
+      '</div>' +
+      '</div>';
+  }
+
+  // One set of delegated listeners handles clicks in the Wall list, On This Day, and Shuffle result alike.
+  function wirePostEvents(container) {
+    container.addEventListener('click', async function(ev) {
+      var commentBtn = ev.target.closest('.comment-send');
+      var reactBtn = ev.target.closest('.react-btn');
+      var pinBtn = ev.target.closest('.pin-btn');
+
+      if (commentBtn) {
+        var postEl = commentBtn.closest('.post');
+        var cName = postEl.querySelector('.comment-name').value.trim();
+        var cText = postEl.querySelector('.comment-text').value.trim();
+        if (!cName || !cText) return;
+        var id = commentBtn.getAttribute('data-id');
+        var target = entries.find(function(e) { return e.id === id; });
+        if (!target) return;
+        if (!target.comments) target.comments = [];
+        target.comments.push({ author: cName, text: cText, date: new Date().toISOString() });
+        render();
+        renderOnThisDay();
+        await saveEntries();
+        return;
+      }
+
+      if (reactBtn) {
+        var id2 = reactBtn.getAttribute('data-id');
+        var emoji = reactBtn.getAttribute('data-emoji');
+        var target2 = entries.find(function(e) { return e.id === id2; });
+        if (!target2) return;
+        if (!target2.reactions) target2.reactions = {};
+
+        var mine = getMyReactions();
+        if (!mine[id2]) mine[id2] = {};
+        var alreadyMine = !!mine[id2][emoji];
+
+        if (alreadyMine) {
+          target2.reactions[emoji] = Math.max(0, (target2.reactions[emoji] || 1) - 1);
+          delete mine[id2][emoji];
+        } else {
+          target2.reactions[emoji] = (target2.reactions[emoji] || 0) + 1;
+          mine[id2][emoji] = true;
+        }
+        setMyReactions(mine);
+
+        var newCount = target2.reactions[emoji];
+        reactBtn.textContent = emoji + (newCount > 0 ? ' ' + newCount : '');
+        reactBtn.classList.toggle('mine', !alreadyMine);
+        reactBtn.classList.remove('popped');
+        void reactBtn.offsetWidth;
+        reactBtn.classList.add('popped');
+        var floater = document.createElement('span');
+        floater.className = 'react-float';
+        floater.textContent = alreadyMine ? '−1' : '+1';
+        reactBtn.appendChild(floater);
+        setTimeout(function() { floater.remove(); }, 650);
+
+        await saveEntries();
+        return;
+      }
+
+      if (pinBtn) {
+        var id3 = pinBtn.getAttribute('data-id');
+        var target3 = entries.find(function(e) { return e.id === id3; });
+        if (!target3) return;
+        target3.pinned = !target3.pinned;
+        render();
+        renderOnThisDay();
+        await saveEntries();
+        return;
+      }
+    });
+  }
+  wirePostEvents(document.getElementById('list'));
+  wirePostEvents(document.getElementById('onThisDayList'));
+  wirePostEvents(document.getElementById('shuffleResult'));
+
+  function render() {
+    updateStreak();
+    populateAuthorFilter();
+    var list = document.getElementById('list');
+    var filterAuthor = document.getElementById('filterAuthor').value;
+    var filterMood = document.getElementById('filterMood').value;
+    var searchTerm = (document.getElementById('searchBox').value || '').trim().toLowerCase();
+    var filtered = entries.filter(function(e) {
+      var matchesSearch = !searchTerm || e.text.toLowerCase().indexOf(searchTerm) !== -1 || e.author.toLowerCase().indexOf(searchTerm) !== -1;
+      return (!filterAuthor || e.author === filterAuthor) && (!filterMood || e.mood === filterMood) && matchesSearch;
+    });
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty">it\'s giving empty. post something or switch up the filters.</div>';
+      return;
+    }
+    var sorted = filtered.slice().sort(function(a, b) {
+      if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+      return new Date(b.date) - new Date(a.date);
+    });
+    var myReactions = getMyReactions();
+    list.innerHTML = sorted.map(function(e) { return postCardHtml(e, myReactions); }).join('');
+  }
+
+  function renderOnThisDay() {
+    var card = document.getElementById('onThisDayCard');
+    var holder = document.getElementById('onThisDayList');
+    var today = new Date();
+    var matches = entries.filter(function(e) {
+      var d = new Date(e.date);
+      return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() !== today.getFullYear();
+    });
+    if (matches.length === 0) {
+      card.style.display = 'none';
+      holder.innerHTML = '';
+      return;
+    }
+    card.style.display = 'block';
+    var myReactions = getMyReactions();
+    holder.innerHTML = matches.map(function(e) { return postCardHtml(e, myReactions); }).join('');
+  }
+
+  document.getElementById('shuffleBtn').addEventListener('click', function() {
+    if (entries.length === 0) { return; }
+    var pick = entries[Math.floor(Math.random() * entries.length)];
+    var holder = document.getElementById('shuffleResult');
+    holder.style.display = 'block';
+    holder.innerHTML = postCardHtml(pick, getMyReactions());
+    holder.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  document.getElementById('filterAuthor').addEventListener('change', render);
+  document.getElementById('filterMood').addEventListener('change', render);
+  document.getElementById('searchBox').addEventListener('input', render);
+
+  function updateStreak() {
+    var byDay = {};
+    entries.forEach(function(e) {
+      var day = e.date.slice(0, 10);
+      byDay[day] = true;
+    });
+    var streak = 0;
+    var cursor = new Date();
+    while (true) {
+      var key = cursor.toISOString().slice(0, 10);
+      if (byDay[key]) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    document.getElementById('streakNum').textContent = streak;
+  }
+
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) loadEntries();
+  });
+</script>
+</body>
+</html>
