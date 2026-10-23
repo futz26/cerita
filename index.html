@@ -88,6 +88,12 @@
     font-weight: 600;
   }
 
+  /* Music Button */
+  .music-btn {
+    position: absolute; right: 16px; top: 28px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-soft); transition: all 0.2s;
+  }
+  .music-btn:hover { color: var(--ink); transform: scale(1.1); }
+
   /* iOS Style Segmented Tabs */
   .tabs {
     display: flex;
@@ -430,29 +436,6 @@
     border: 1px dashed var(--border);
   }
 
-  /* Preview Card Overrides */
-  .preview-label { 
-    font-size: 11px; 
-    letter-spacing: 0.15em; 
-    text-transform: uppercase; 
-    color: var(--ink-muted); 
-    margin-bottom: 12px; 
-    font-weight: 600;
-    text-align: center;
-  }
-  .preview-card {
-    border: 1px dashed var(--border-hover);
-    border-radius: var(--radius-lg);
-    background: var(--bg);
-    opacity: 0.6;
-    transition: all 0.3s ease;
-  }
-  .preview-card.filled { 
-    opacity: 1; 
-    border: 1px solid var(--primary); 
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
-  }
-
   /* Animations */
   @keyframes fadeSlideUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -626,6 +609,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
+<!-- Background Music Audio Tag -->
+<audio id="bgMusic" loop>
+  <!-- Change this source to your actual background music file -->
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"> 
+</audio>
+
 <div class="pin-overlay hidden" id="pinOverlay">
   <div class="pin-box" id="pinNameStep">
     <div class="lock-icon">👤</div>
@@ -678,6 +667,8 @@
 <div class="topbar">
   <h1>vault kitaa</h1>
   <p>no cap, just us</p>
+  <!-- Background Music Toggle Button -->
+  <button id="musicToggleBtn" class="music-btn" title="Toggle Music">🔈</button>
 </div>
 
 <div class="tabs">
@@ -727,22 +718,6 @@
       </div>
 
       <button class="primary" id="saveBtn">Send it to the Vault</button>
-    </div>
-
-    <div class="fade-in fade-in-2" style="margin-top: 32px;">
-      <div class="preview-label">Live Preview</div>
-      <div class="preview-card" id="previewCard">
-        <div class="post-head" style="padding: 16px 16px 8px;">
-          <div class="post-avatar" id="previewAvatar">?</div>
-          <div>
-            <div class="post-author" id="previewAuthor">Your name</div>
-            <div class="post-date">Just now</div>
-          </div>
-        </div>
-        <p class="post-text" style="padding: 0 16px 16px;" id="previewText">
-          <span id="previewMood" class="post-mood"></span><span id="previewTextInner" style="color: var(--ink-muted);">waiting for you to lock in...</span>
-        </p>
-      </div>
     </div>
 
     <div id="status" class="status"></div>
@@ -799,6 +774,22 @@
 </div>
 
 <script>
+  // Background Music Logic
+  var bgMusic = document.getElementById('bgMusic');
+  var musicBtn = document.getElementById('musicToggleBtn');
+  var isMusicPlaying = false;
+  
+  musicBtn.addEventListener('click', function() {
+    if (isMusicPlaying) { 
+      bgMusic.pause(); 
+      musicBtn.textContent = '🔈'; 
+    } else { 
+      bgMusic.play(); 
+      musicBtn.textContent = '🔊'; 
+    }
+    isMusicPlaying = !isMusicPlaying;
+  });
+
   var tabWrite = document.getElementById('tabWrite');
   var tabWall = document.getElementById('tabWall');
   var pageWrite = document.getElementById('pageWrite');
@@ -973,26 +964,6 @@
     });
   }
 
-  function updatePreview() {
-    var name = document.getElementById('whoName').value.trim();
-    var text = document.getElementById('entryText').value.trim();
-    document.getElementById('previewAuthor').textContent = name || 'Your name';
-    document.getElementById('previewAvatar').textContent = name ? initials(name) : '?';
-    document.getElementById('previewMood').textContent = selectedMood ? selectedMood + ' ' : '';
-    
-    var innerTextEl = document.getElementById('previewTextInner');
-    if(text) {
-        innerTextEl.innerHTML = linkify(text);
-        innerTextEl.style.color = "var(--ink)";
-    } else {
-        innerTextEl.textContent = 'waiting for you to lock in...';
-        innerTextEl.style.color = "var(--ink-muted)";
-    }
-
-    var card = document.getElementById('previewCard');
-    card.classList.toggle('filled', !!(name && text));
-  }
-
   function updateProgress() {
     var name = document.getElementById('whoName').value.trim();
     var text = document.getElementById('entryText').value.trim();
@@ -1001,12 +972,11 @@
     document.getElementById('progText').classList.toggle('done', !!text);
   }
 
-  document.getElementById('whoName').addEventListener('input', function() { updatePreview(); updateProgress(); });
+  document.getElementById('whoName').addEventListener('input', function() { updateProgress(); });
 
   document.getElementById('entryText').addEventListener('input', function() {
     var words = this.value.trim().length ? this.value.trim().split(/\s+/).length : 0;
     document.getElementById('wordCount').textContent = words + (words === 1 ? ' word' : ' words');
-    updatePreview();
     updateProgress();
   });
 
@@ -1015,7 +985,6 @@
       selectedMood = btn.getAttribute('data-m');
       document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
-      updatePreview();
       updateProgress();
     });
   });
@@ -1109,7 +1078,6 @@
     document.getElementById('wordCount').textContent = '0 words';
     selectedPhoto = null;
     
-    updatePreview();
     updateProgress();
     render();
     
@@ -1160,7 +1128,9 @@
         (admin ? ' <span class="admin-del del-comment" data-id="' + e.id + '" data-ci="' + ci + '" title="Delete comment">🗑</span>' : '') +
         '</div>';
     }).join('');
+    
     var lockedName = getLockedName();
+    var nameFieldAttr = admin ? '' : 'readonly';
     
     var blurClass = e.blurred ? ' content-blurred' : '';
     var adminBlurBtn = admin ? '<span class="admin-blur toggle-blur" data-id="' + e.id + '" title="Toggle Blur">👁️</span>' : '';
@@ -1185,7 +1155,7 @@
       '<div class="comments">' +
         commentsHtml +
         '<div class="comment-form">' +
-          '<input type="text" class="comment-name" placeholder="Name" value="' + escapeHtml(lockedName).replace(/"/g, '&quot;') + '" readonly>' +
+          '<input type="text" class="comment-name" placeholder="Name" value="' + escapeHtml(lockedName).replace(/"/g, '&quot;') + '" ' + nameFieldAttr + '>' +
           '<input type="text" class="comment-text" placeholder="Add a reply...">' +
           '<button class="comment-send" data-id="' + e.id + '">Reply</button>' +
         '</div>' +
