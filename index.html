@@ -386,6 +386,9 @@
     border-radius: var(--radius-sm);
   }
   .comment-form .comment-name { width: 30%; }
+  .admin-del { cursor: pointer; font-size: 13px; opacity: 0.8; margin-left: 6px; }
+  .admin-del:hover { opacity: 1; }
+  .post-head .del-post { margin-left: auto; font-size: 16px; }
   .comment-form .comment-text { flex: 1; }
   .comment-form button {
     background: rgba(6, 182, 212, 0.1);
@@ -618,7 +621,7 @@
       <div class="pin-key pin-back" id="pinBackBtn">⌫</div>
     </div>
     <div class="pin-error" id="pinError"></div>
-  </div>
+</div>
 </div>
 
 <div class="topbar">
@@ -772,6 +775,10 @@
 
   // --- PIN lock for the Feed tab ---
   var FEED_PIN = '1402';
+  var ADMIN_PIN = '2693'; // super admin: same feed, plus delete posts/comments
+  function isAdmin() {
+    return sessionStorage.getItem('vault-kitaa-admin') === 'true';
+  }
   var pinEntered = '';
   var pinOverlay = document.getElementById('pinOverlay');
   var pinNameStep = document.getElementById('pinNameStep');
@@ -828,9 +835,16 @@
 
   function checkPin() {
     if (pinEntered.length !== 4) return;
-    if (pinEntered === FEED_PIN) {
+    if (pinEntered === FEED_PIN || pinEntered === ADMIN_PIN) {
       sessionStorage.setItem('vault-kitaa-feed-unlocked', 'true');
+      if (pinEntered === ADMIN_PIN) {
+        sessionStorage.setItem('vault-kitaa-admin', 'true');
+      } else {
+        sessionStorage.removeItem('vault-kitaa-admin');
+      }
       closePinOverlay();
+      render();
+      renderOnThisDay();
       goToWall();
     } else {
       pinError.textContent = 'wrong code, try again';
@@ -899,6 +913,7 @@
     return d.toISOString().slice(0, 16);
   }
   document.getElementById('entryDate').value = nowForInput();
+
 
   if (db) {
     firebase.auth().signInAnonymously().catch(function(err) {
@@ -1087,15 +1102,20 @@
       ' at ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     var photoHtml = e.photo ? '<img class="post-photo" src="' + e.photo + '">' : '';
     var comments = e.comments || [];
-    var commentsHtml = comments.map(function(c) {
-      return '<div class="comment"><b>' + escapeHtml(c.author) + '</b> ' + linkify(c.text) + '</div>';
+    var admin = isAdmin();
+    var commentsHtml = comments.map(function(c, ci) {
+      return '<div class="comment"><b>' + escapeHtml(c.author) + '</b> ' + linkify(c.text) +
+        (admin ? ' <span class="admin-del del-comment" data-id="' + e.id + '" data-ci="' + ci + '" title="Delete comment">🗑</span>' : '') +
+        '</div>';
     }).join('');
+    var lockedName = getLockedName();
     
     return '<div class="post fade-in' + (e.pinned ? ' pinned' : '') + '" data-id="' + e.id + '">' +
       '<div class="post-head">' +
         '<div class="post-avatar">' + initials(e.author) + '</div>' +
         '<div><div class="post-author">' + escapeHtml(e.author) + '</div>' +
         '<div class="post-date">' + dateStr + '</div></div>' +
+        (admin ? '<span class="admin-del del-post" data-id="' + e.id + '" title="Delete post">🗑</span>' : '') +
         '<span class="pin-btn' + (e.pinned ? ' active' : '') + '" data-id="' + e.id + '" title="Pin">📌</span>' +
       '</div>' +
       photoHtml +
@@ -1110,7 +1130,7 @@
       '<div class="comments">' +
         commentsHtml +
         '<div class="comment-form">' +
-          '<input type="text" class="comment-name" placeholder="Name">' +
+          '<input type="text" class="comment-name" placeholder="Name" value="' + escapeHtml(lockedName).replace(/"/g, '&quot;') + '" readonly>' +
           '<input type="text" class="comment-text" placeholder="Add a reply...">' +
           '<button class="comment-send" data-id="' + e.id + '">Reply</button>' +
         '</div>' +
@@ -1123,6 +1143,26 @@
       var commentBtn = ev.target.closest('.comment-send');
       var reactBtn = ev.target.closest('.react-btn');
       var pinBtn = ev.target.closest('.pin-btn');
+      var delPost = ev.target.closest('.del-post');
+      var delComment = ev.target.closest('.del-comment');
+
+      if ((delPost || delComment) && isAdmin()) {
+        if (delPost) {
+          if (!confirm('Delete this whole post?')) return;
+          var pid = delPost.getAttribute('data-id');
+          entries = entries.filter(function(e) { return e.id !== pid; });
+        } else {
+          if (!confirm('Delete this comment?')) return;
+          var cid = delComment.getAttribute('data-id');
+          var ci = parseInt(delComment.getAttribute('data-ci'), 10);
+          var tp = entries.find(function(e) { return e.id === cid; });
+          if (tp && tp.comments) tp.comments.splice(ci, 1);
+        }
+        render();
+        renderOnThisDay();
+        await saveEntries();
+        return;
+      }
 
       if (commentBtn) {
         var postEl = commentBtn.closest('.post');
@@ -1188,7 +1228,7 @@
       }
     });
   }
-  
+
   wirePostEvents(document.getElementById('list'));
   wirePostEvents(document.getElementById('onThisDayList'));
   wirePostEvents(document.getElementById('shuffleResult'));
